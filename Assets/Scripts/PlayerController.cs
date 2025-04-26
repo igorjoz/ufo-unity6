@@ -1,12 +1,13 @@
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
     Rigidbody2D rb2d;
     public float speed;
+
     private int counter;
+    private int totalPickups;           // ← dodajemy nową zmienną
     public TMP_Text scoreText;
     public TMP_Text winText;
 
@@ -14,6 +15,16 @@ public class PlayerController : MonoBehaviour
     {
         rb2d = GetComponent<Rigidbody2D>();
         counter = 0;
+
+        // Automatyczne zliczenie wszystkich Pickupów w scenie:
+        GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pickup");
+        totalPickups = pickups.Length;
+
+        // Ukrywamy tekst zwycięstwa na start
+        winText.gameObject.SetActive(false);
+
+        // Wyświetlamy od razu początkowy stan (0/totalPickups)
+        UpdateOnScreenScore();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -22,16 +33,16 @@ public class PlayerController : MonoBehaviour
         {
             counter++;
             Destroy(collision.gameObject);
-
             UpdateOnScreenScore();
         }
     }
 
     void UpdateOnScreenScore()
     {
-        scoreText.text = "Punkty: " + counter.ToString() + "/5";
+        // Wyświetlamy aktualny przebieg: counter z całkowitej liczby pickupów
+        scoreText.text = $"Punkty: {counter}/{totalPickups}";
 
-        if (counter == 5)
+        if (counter >= totalPickups)
         {
             winText.gameObject.SetActive(true);
         }
@@ -41,15 +52,8 @@ public class PlayerController : MonoBehaviour
     {
         float moveHorizontal = Input.GetAxis("Horizontal");
         float moveVertical = Input.GetAxis("Vertical");
-
         Vector2 movement = new Vector2(moveHorizontal, moveVertical);
 
         rb2d.AddForce(movement * speed);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }
